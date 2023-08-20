@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"><meta property="og:site_name" content="KCN&#39;s Blog"/>
+<meta property="og:title" content="Logback 自动 Json 序列化和转换器原理解析"/>
+<meta property="og:description" content="如何自动对对象进行 json 序列化 前情提要 java 开发中，大家一般都会用 Slf4j&#43;logback 的组合来写日志。我也是。 logback 有个很方便的功能：当你占位符对应的参数是个对象的时候，"/>
+<meta property="og:locale" content="zh_CN"/>
+<meta property="og:url" content="https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/"/>
+<meta property="og:image" content="https://kushnee.github.io//images/favicon.ico"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time"   content="2023-08-19 23:44:42 &#43;0800 CST"/>
+<meta property="article:modified_time" content="2022-11-28 16:53:08 &#43;0800 CST"/>
+<meta property="article:expiration_time" content="0001-01-01 00:00:00 &#43;0000 UTC"/>
+<meta property="article:author" content="Kush Nee"/>
+<meta property="article:tag" content="logback converter "/>
+<meta property="article:section" content=""/><title>Logback 自动 Json 序列化和转换器原理解析 | KCN&#39;s Blog</title><link href="/css/root.css" rel="stylesheet">
+<link href="/css/sidebar.css" rel="stylesheet">
+<link href="/css/main.css" rel="stylesheet">
+<link href="/css/page.css" rel="stylesheet">
+<link href="/css/scrollbar.css" rel="stylesheet">
+<link href="/css/tags.css" rel="stylesheet">
+<link href="/css/fastsearch.css" rel="stylesheet">
+<link href="/css/print.css" rel="stylesheet">
+<link href="/css/message.css" rel="stylesheet">
+<link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Andada+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Indie+Flower&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+SC:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link rel="shortcut icon" href="/images/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="icon" href="/images/favicon.ico" type="image/vnd.microsoft.icon" /><script src="/js/jquery-3.6.0.min.js"></script>
+</head>
+<body class="site-root" id="SiteRoot">
+  <div id="preload-mask">
+    <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+  </div>
+  <div class="site-inner" id="SiteInner">
+    <header class="site-header" id="SiteHeader"><h1 class="site-title">KCN&#39;s Blog</h1><ul class="main-menu"><li class="menu-item"><a href="/"><i class="fas fa-home"></i>Home</a></li><li class="menu-item"><a href="/about/"><i class="fas fa-user"></i>About</a></li><li class="menu-item"><a href="/tags/"><i class="fas fa-tags"></i>Tags</a></li><li class="menu-item"><a href="/series/"><i class="fas fa-book"></i>Series</a></li><li class="menu-item search" id="searchBtn"><i class="fas fa-search"></i>CTRL-/</li>
+  </ul></header>
+    <div class="site-main" id="SiteMain">
+      <div class="site-left" data-pjax></div>
+      <div class="site-message-list" id="MessageList"></div>
+      <div class="site-content" data-pjax id="SiteContent"><h1 class="article-title">Logback 自动 Json 序列化和转换器原理解析</h1>
+  <div class="article-metadata"><ul class="meta-section"><li class="meta-item">
+      <i class="fas fa-upload"></i>
+      <span class="meta-item-text">Published on</span>
+      <span class="meta-item-value">2023-08-19</span>
+  </li><li class="meta-item">
+    <i class="fas fa-file-pen"></i>
+    <span class="meta-item-text">Modified on</span>
+    <span class="meta-item-value">2022-11-28</span>
+  </li></ul><ul class="meta-section"><li class="meta-item">
+        <i class="fas fa-tags"></i>
+        <span class="meta-item-text">Tags:</span>
+        <span class="meta-item-value"><a class="tag" href="/tags/logback">logback</a>, <a class="tag" href="/tags/converter">converter</a></span>
+      </li><li class="meta-item"><i class="fas fa-folder-open"></i>
+        <span class="meta-item-text">In</span>
+        <a class="meta-item-value" href="/series/java/">Java</a>
+      </li></ul><ul class="meta-section">
+    <li class="meta-item">
+      <i class="far fa-file-word"></i>
+      <span class="meta-item-text">Word count ≈</span>
+      <span class="meta-item-value">2300</span>
+    </li>
+    <li class="meta-item">
+      <i class="fas fa-hourglass-start"></i>
+      <span class="meta-item-text">Reading time ≈</span>
+      <span class="meta-item-value">5 min</span></li>
+  </ul></div><div class="article-content"><h2 class="heading" id="如何自动对对象进行-json-序列化">
+  <a href="#%e5%a6%82%e4%bd%95%e8%87%aa%e5%8a%a8%e5%af%b9%e5%af%b9%e8%b1%a1%e8%bf%9b%e8%a1%8c-json-%e5%ba%8f%e5%88%97%e5%8c%96">如何自动对对象进行 json 序列化</a>
+</h2><h3 class="heading" id="前情提要">
+  <a href="#%e5%89%8d%e6%83%85%e6%8f%90%e8%a6%81">前情提要</a>
+</h3><p>java 开发中，大家一般都会用 Slf4j+logback 的组合来写日志。我也是。</p>
+<p>logback 有个很方便的功能：当你占位符对应的参数是个对象的时候，它会自动调用该对象的 toString 方法进行序列化，不用你手动做调用。</p>
+<p>这个已经挺方便了，但是这样子的数据展示方式还是有局限性。当你需要把一段数据拿出来给其他语言的后端、前端，甚至是业务和运营看的时候，一段 raw 的数据，对方很可能就拒绝了。</p>
+<p>这个时候我就想到，json 是一种更通用的数据格式啊。java 里本身就有很多方便快捷的 json 框架直接使用，而且就算你拿出来的还是一行数据，现在网上有那么多 json 美化工具，查看的门槛其实很低的。</p>
+<h3 class="heading" id="方案设计">
+  <a href="#%e6%96%b9%e6%a1%88%e8%ae%be%e8%ae%a1">方案设计</a>
+</h3><p>确定了需要转换的格式之后，就是确定实现细节了。刚开始其实我想的是写个切面，但是很快就意识到这样并不优雅。</p>
+<p>为了操作到所有的日志，你肯定需要把切点织入 logback 的相关方法。简单来说，就是 <code>ch.qos.logback.classic.Logger</code> 这个类的方法中。那么多方法重载，看着都心累。。。</p>
+<p>当然，用切面肯定能实现自动 json 序列化，但是我想做的其实是「替换掉日志输出中的序列化一环」，而不是「在写日志前加一个统一操作」。两者的含义并不一样，前者是对日志框架的修改，后者是对项目本身的修改。</p>
+<p>所幸，后来被我找到了 logback 本身的 hook-转换器，可以在内部进行 json 方法的调用。</p>
+<h3 class="heading" id="具体实现">
+  <a href="#%e5%85%b7%e4%bd%93%e5%ae%9e%e7%8e%b0">具体实现</a>
+</h3><p>网上找到一篇自定义 MessageConverter 的文章：<a href="https://www.hollischuang.com/archives/3689" target="_blank" rel="external">自定义一个 logback 的 MessageConverter</a>。</p>
+<p>原文用的是 fastjson。虽然公司大量用的都是这个 json 框架，但我自己的项目为了减少依赖，会直接使用 <code>spring-boot-starter-web</code> 里的 jackson。下面贴出我的修改版：</p>
+<ol>
+<li>自定义一个 converter：</li>
+</ol>
+<div class="highlight"><div style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">public</span> <span style="color:#268bd2">class</span> <span style="color:#268bd2">JsonConverter</span> <span style="color:#268bd2">extends</span> MessageConverter <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">private</span> <span style="color:#268bd2">final</span> <span style="color:#268bd2">static</span> ObjectMapper OBJECT_MAPPER <span style="color:#719e07">=</span> <span style="color:#719e07">new</span> ObjectMapper<span style="color:#719e07">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">public</span> String <span style="color:#268bd2">convert</span><span style="color:#719e07">(</span>ILoggingEvent event<span style="color:#719e07">)</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#719e07">try</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>            List<span style="color:#719e07">&lt;</span>Object<span style="color:#719e07">&gt;</span> list <span style="color:#719e07">=</span> <span style="color:#719e07">new</span> ArrayList<span style="color:#719e07">&lt;&gt;();</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">for</span> <span style="color:#719e07">(</span>Object argument <span style="color:#719e07">:</span> event<span style="color:#719e07">.</span>getArgumentArray<span style="color:#719e07">())</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>                Object o <span style="color:#719e07">=</span> <span style="color:#719e07">(</span>argument<span style="color:#719e07">.</span>getClass<span style="color:#719e07">().</span>getClassLoader<span style="color:#719e07">()</span> <span style="color:#719e07">!=</span> <span style="color:#cb4b16">null</span> <span style="color:#719e07">||</span> argument <span style="color:#719e07">instanceof</span> Collection
+</span></span><span style="display:flex;"><span>                    <span style="color:#719e07">||</span> argument <span style="color:#719e07">instanceof</span> Map<span style="color:#719e07">)</span> <span style="color:#719e07">?</span> OBJECT_MAPPER<span style="color:#719e07">.</span>writeValueAsString<span style="color:#719e07">(</span>argument<span style="color:#719e07">)</span> <span style="color:#719e07">:</span> argument<span style="color:#719e07">;</span>
+</span></span><span style="display:flex;"><span>                list<span style="color:#719e07">.</span>add<span style="color:#719e07">(</span>o<span style="color:#719e07">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">return</span> MessageFormatter<span style="color:#719e07">.</span>arrayFormat<span style="color:#719e07">(</span>event<span style="color:#719e07">.</span>getMessage<span style="color:#719e07">(),</span> list<span style="color:#719e07">.</span>toArray<span style="color:#719e07">()).</span>getMessage<span style="color:#719e07">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#719e07">}</span> <span style="color:#719e07">catch</span> <span style="color:#719e07">(</span>Exception e<span style="color:#719e07">)</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">return</span> <span style="color:#268bd2">super</span><span style="color:#719e07">.</span>convert<span style="color:#719e07">(</span>event<span style="color:#719e07">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#719e07">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>添加自定义 converter 到 logback-spring.xml 配置文件中</li>
+</ol>
+<div class="highlight"><div style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#268bd2">&lt;configuration&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">&lt;conversionRule</span> conversionWord=<span style="color:#2aa198">&#34;msg&#34;</span> converterClass=<span style="color:#2aa198">&#34;xxx.xxx.xxx.config.JsonConverter&#34;</span><span style="color:#268bd2">/&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">&lt;/configuration&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 class="heading" id="logback-转换器原理分析">
+  <a href="#logback-%e8%bd%ac%e6%8d%a2%e5%99%a8%e5%8e%9f%e7%90%86%e5%88%86%e6%9e%90">logback 转换器原理分析</a>
+</h2><p>虽然这样可以自动序列化了，但我还是有不少疑问：</p>
+<p>MessageConverter 已经是一个具体的类了，为什么要继承它而不是它的父类 ClassicConverter 呢？为什么只要在配置文件里添加 conversionRule 就能被 logback 使用呢？如果对一个关键字添加了多个转换器，它们是怎么被调用的呢？</p>
+<p>这些答案，都只能靠看源码了。</p>
+<h3 class="heading" id="springboot-加载-logback-配置文件">
+  <a href="#springboot-%e5%8a%a0%e8%bd%bd-logback-%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6">springboot 加载 logback 配置文件</a>
+</h3><p>springboot 是使用 LoggingApplicationListener 这个类完成对日志系统初始化的。我们先来看下这个类，顺便还能理解怎么自动装配的 logback-spring.xml 文件。</p>
+<p>当然，先放张时序图便于理解：<br />
+<div class="image-wrap">
+    <img src="%e5%8a%a0%e8%bd%bd%e6%b5%81%e7%a8%8b.png" alt="加载流程"  data-fancybox data-src="%e5%8a%a0%e8%bd%bd%e6%b5%81%e7%a8%8b.png"/>
+</div></p>
+<p>首先，<code>LoggingApplicationListerner</code>使用观察者模式监听到 spring 应用启动后的环境准备事件：<code>ApplicationEnvironmentPreparedEvent</code>，然后就会去执行相关的初始化操作，获取配置文件。</p>
+<p>获取配置文件的步骤就是 spring 的特殊化处理。它会先在<code>getSelfInitializationConfig</code>查找 logback 的标准配置文件：&ldquo;logback-test.groovy&rdquo;, &ldquo;logback-test.xml&rdquo;, &ldquo;logback.groovy&rdquo;, “logback.xml&quot;。如果这些文件都没有找到，spring 会去做一个文件名的修改，再去获取：</p>
+<div class="highlight"><div style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#586e75">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#586e75"> * Return the spring config locations for this system. By default this method returns
+</span></span></span><span style="display:flex;"><span><span style="color:#586e75"> * a set of locations based on {@link #getStandardConfigLocations()}.
+</span></span></span><span style="display:flex;"><span><span style="color:#586e75"> * @return the spring config locations
+</span></span></span><span style="display:flex;"><span><span style="color:#586e75"> * @see #getSpringInitializationConfig()
+</span></span></span><span style="display:flex;"><span><span style="color:#586e75"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">protected</span> String<span style="color:#719e07">[]</span> <span style="color:#268bd2">getSpringConfigLocations</span><span style="color:#719e07">()</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>    String<span style="color:#719e07">[]</span> locations <span style="color:#719e07">=</span> getStandardConfigLocations<span style="color:#719e07">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#719e07">for</span> <span style="color:#719e07">(</span><span style="color:#dc322f">int</span> i <span style="color:#719e07">=</span> 0<span style="color:#719e07">;</span> i <span style="color:#719e07">&lt;</span> locations<span style="color:#719e07">.</span>length<span style="color:#719e07">;</span> i<span style="color:#719e07">++)</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>        String extension <span style="color:#719e07">=</span> StringUtils<span style="color:#719e07">.</span>getFilenameExtension<span style="color:#719e07">(</span>locations<span style="color:#719e07">[</span>i<span style="color:#719e07">]);</span>
+</span></span><span style="display:flex;"><span>        locations<span style="color:#719e07">[</span>i<span style="color:#719e07">]</span> <span style="color:#719e07">=</span> locations<span style="color:#719e07">[</span>i<span style="color:#719e07">].</span>substring<span style="color:#719e07">(</span>0<span style="color:#719e07">,</span> locations<span style="color:#719e07">[</span>i<span style="color:#719e07">].</span>length<span style="color:#719e07">()</span> <span style="color:#719e07">-</span> extension<span style="color:#719e07">.</span>length<span style="color:#719e07">()</span> <span style="color:#719e07">-</span> 1<span style="color:#719e07">)</span> <span style="color:#719e07">+</span> <span style="color:#2aa198">&#34;-spring.&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">+</span> extension<span style="color:#719e07">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#719e07">return</span> locations<span style="color:#719e07">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#719e07">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>它会把字符串拆成两部分，<code>.</code>前的部分，和<code>.</code>后的部分（extension），然后在两者之间加上<code>-spring.</code>组成新的字符串。logback.xml -&gt; logback-spring.xml。</p>
+<p>这就是为什么说没有 logback.xml 文件的时候 spring 会自动去找 logback-spring.xml 文件的原因，也是为什么存在了 logback.xml 后 logback-spring.xml 配置就会失效。</p>
+<h3 class="heading" id="logback-完成配置初始化">
+  <a href="#logback-%e5%ae%8c%e6%88%90%e9%85%8d%e7%bd%ae%e5%88%9d%e5%a7%8b%e5%8c%96">logback 完成配置初始化</a>
+</h3><p><code>loadConfiguration</code>方法会在完成前置动作后，把相关信息交还给 logback，logback 会使用 <code>JoranConfigurator</code> 进行配置初始化。</p>
+<p>来，再来个时序图(只会提供转换器相关初始化的过程，其他元素的动作被省略了）：<br />
+<div class="image-wrap">
+    <img src="%e5%88%9d%e5%a7%8b%e5%8c%96%e6%b5%81%e7%a8%8b.png" alt="初始化流程"  data-fancybox data-src="%e5%88%9d%e5%a7%8b%e5%8c%96%e6%b5%81%e7%a8%8b.png"/>
+</div></p>
+<p>细节上，SaxEventRecorder 在进行 <code>recordEvents </code> 时会创建一个 <code>SAXParser</code> 用于解析 xml 文件，然后再调用重载的 <code>startElement</code> 方法把相关的 startElement 放到一个 list 中。<div class="image-wrap">
+    <img src="https://i.loli.net/2021/02/16/JnIVijaOpm3fCsc.png" alt="image-20210216142528250"  data-fancybox data-src="https://i.loli.net/2021/02/16/JnIVijaOpm3fCsc.png"/>
+</div></p>
+<p>startElement 方法中，先过滤出相关 tag 的 action，然后调用 callBeginAction 依次执行具体 action 的 begin 方法。在我们这儿，就是 ConversionRuleAction。</p>
+<p>在 ConversionRuleAction 中，会提取 conversionWord 和 conversionClass，然后把这两个字段作为一对 KV，插入一个叫 ruleResigtry 的 hashMap 中。而 ruleResigtry 本身，则会被保存在 logback 全局的 context 中。<div class="image-wrap">
+    <img src="https://i.loli.net/2021/02/16/KcNynJtMI4SQzR6.png" alt="image-20210216144833091"  data-fancybox data-src="https://i.loli.net/2021/02/16/KcNynJtMI4SQzR6.png"/>
+</div></p>
+<p>再加之后的一些验证、上下文信息补全的操作，logback 就把一个配置文件的内容反序列化到上下文中了。</p>
+<div class="tab info"><div class="tab-sum"><span class="tab-sum-content">tip</span></div><div class="tab-content">这里也能看出一个结论，当你对同一个 conversionWord 提供了多个不同的转换器的时候，只有最后一个会生效。因为依次对 conversionRule 执行ConversionRuleAction#begin，新的一个转换器会覆盖掉 ruleRegistry 中相同 key 的值。（hashMap#put 的基本知识）</div>
+</div>
+<h3 class="heading" id="logger-的具体调用">
+  <a href="#logger-%e7%9a%84%e5%85%b7%e4%bd%93%e8%b0%83%e7%94%a8">Logger 的具体调用</a>
+</h3><p>最后在实际使用上的流程：<br />
+<div class="image-wrap">
+    <img src="%e8%b0%83%e7%94%a8%e6%b5%81%e7%a8%8b.png" alt="调用流程"  data-fancybox data-src="%e8%b0%83%e7%94%a8%e6%b5%81%e7%a8%8b.png"/>
+</div></p>
+<p>而 PatternLayout 继承的 PatternLayoutBase 会在自身初始化的时候，解析配置文件中的正则表达式，然后将关键字对应的转换器添加到一条链表中。所以在执行 writeLoopOnConverters 的时候，就是依次执行这些转换器，最后吐出一条转换完的字符串。<strong>（具体初始化的调用在哪还没看到，之后看完了再重新写一篇吧）</strong></p>
+<h2 class="heading" id="总结">
+  <a href="#%e6%80%bb%e7%bb%93">总结</a>
+</h2><p>如果你只是需要添加 json 序列化的话，不用继承 MessageConverter，直接继承 ClassicConverter 然后提供相关的自定义配置就可以了。当然别忘了再配置文件里加上 conversionRule。</p>
+<div class="highlight"><div style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#495050">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">public</span> <span style="color:#268bd2">class</span> <span style="color:#268bd2">JsonConverter</span> <span style="color:#268bd2">extends</span> ClassicConverter <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">private</span> <span style="color:#268bd2">final</span> <span style="color:#268bd2">static</span> ObjectMapper OBJECT_MAPPER <span style="color:#719e07">=</span> <span style="color:#719e07">new</span> ObjectMapper<span style="color:#719e07">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">public</span> String <span style="color:#268bd2">convert</span><span style="color:#719e07">(</span>ILoggingEvent event<span style="color:#719e07">)</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#719e07">try</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>            List<span style="color:#719e07">&lt;</span>Object<span style="color:#719e07">&gt;</span> list <span style="color:#719e07">=</span> <span style="color:#719e07">new</span> ArrayList<span style="color:#719e07">&lt;&gt;();</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">for</span> <span style="color:#719e07">(</span>Object argument <span style="color:#719e07">:</span> event<span style="color:#719e07">.</span>getArgumentArray<span style="color:#719e07">())</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>                Object o <span style="color:#719e07">=</span> <span style="color:#719e07">(</span>argument<span style="color:#719e07">.</span>getClass<span style="color:#719e07">().</span>getClassLoader<span style="color:#719e07">()</span> <span style="color:#719e07">!=</span> <span style="color:#cb4b16">null</span> <span style="color:#719e07">||</span> argument <span style="color:#719e07">instanceof</span> Collection
+</span></span><span style="display:flex;"><span>                    <span style="color:#719e07">||</span> argument <span style="color:#719e07">instanceof</span> Map<span style="color:#719e07">)</span> <span style="color:#719e07">?</span> OBJECT_MAPPER<span style="color:#719e07">.</span>writeValueAsString<span style="color:#719e07">(</span>argument<span style="color:#719e07">)</span> <span style="color:#719e07">:</span> argument<span style="color:#719e07">;</span>
+</span></span><span style="display:flex;"><span>                list<span style="color:#719e07">.</span>add<span style="color:#719e07">(</span>o<span style="color:#719e07">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">return</span> MessageFormatter<span style="color:#719e07">.</span>arrayFormat<span style="color:#719e07">(</span>event<span style="color:#719e07">.</span>getMessage<span style="color:#719e07">(),</span> list<span style="color:#719e07">.</span>toArray<span style="color:#719e07">()).</span>getMessage<span style="color:#719e07">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#719e07">}</span> <span style="color:#719e07">catch</span> <span style="color:#719e07">(</span>Exception e<span style="color:#719e07">)</span> <span style="color:#719e07">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#719e07">return</span> event<span style="color:#719e07">.</span>getFormattedMessage<span style="color:#719e07">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#719e07">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#719e07">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></div></div>
+      <div class="site-comment"></div>
+      <div class="site-right">
+        <div class="series-container">
+          <div class="series-toggle"><i class="fas fa-book"></i></div>
+          <div id="SeriesList" class="series-content"><a class="series-title" href="/series/java/">Java</a><ul class="series-list"><li>
+    <a class="series-item" href="/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">Logback 自动 Json 序列化和转换器原理解析</a></li><li>
+    <a class="series-item" href="/series/java/lombok-%E4%B8%AD-data-%E5%92%8C-builder-%E5%90%88%E7%94%A8%E4%BA%A7%E7%94%9F%E7%9A%84%E9%97%AE%E9%A2%98/">Lombok 中 Data 和 Builder 合用产生的问题</a></li></ul>
+          </div>
+        </div>
+      </div>
+    </div><div id="fastSearch">
+  <div class="fast-search-container">
+    <div class="fast-search-header">
+      <input id="searchInput" tabindex="-1" disabled autocomplete="off">
+      <span class="fast-search-hint" id="searchHint">CTRL-/</span>
+    </div>
+    <ul id="searchResults">
+      <div id="searchLoading" class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </ul>
+  </div>
+</div>
+<script src="/js/fuse.min.js"></script>
+<script src="/js/fastsearch.js"></script><footer class="site-footer" id="SiteFooter"><div class="footer-poweredby">
+    <span>Powered by <a href="https://gohugo.io" target="_blank">Hugo</a></span>
+    <span class="division">|</span>
+    <span>Theme - <a href="https://github.com/alohaia/hugo-theme-daisilia" target="_blank">Daisilia</a></span>
+</div><div class="footer-copyright">© 2016 - 2023<span class="heart animate__heartBeat animate__infinite"><i class="fas fa-heart"></i></span>
+    <span><a href="https://kushnee.github.io" target="_blank">Kush Nee</a></span>
+</div><div class="footer-creativecommons">本博客所有文章除特别声明外，均采用 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处。</div></footer>
+    <aside class="site-sidebar" id="SiteSidebar"><div class="sidebar-container">
+  <div class="sidebar-nav" data-pjax><span role="button" class="sidebar-nav-item sidebar-nav-series">Table of Contents</span>
+      <span role="button" class="sidebar-nav-item sidebar-nav-overview">Overview</span></div>
+  <div class="sidebar-content">
+    <div class="sidebar-toc sidebar-pannel" data-pjax><h1 class="toc-title" id="TOCTitle">Logback 自动 Json 序列化和转换器原理解析</h1><nav id="TableOfContents">
+  <ul>
+    <li><a href="#如何自动对对象进行-json-序列化">如何自动对对象进行 json 序列化</a>
+      <ul>
+        <li><a href="#前情提要">前情提要</a></li>
+        <li><a href="#方案设计">方案设计</a></li>
+        <li><a href="#具体实现">具体实现</a></li>
+      </ul>
+    </li>
+    <li><a href="#logback-转换器原理分析">logback 转换器原理分析</a>
+      <ul>
+        <li><a href="#springboot-加载-logback-配置文件">springboot 加载 logback 配置文件</a></li>
+        <li><a href="#logback-完成配置初始化">logback 完成配置初始化</a></li>
+        <li><a href="#logger-的具体调用">Logger 的具体调用</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav></div>
+    <div class="sidebar-overview sidebar-pannel">
+      <div class="sidebar-avatar">
+        <a href="/about"><img class="site-avatar-image" alt="KCN" src="/images/avatar.png"></a>
+      </div>
+      <p class="site-author-name">Kush Nee</p>
+      <p class="site-description">PT &amp; Code</p><div class="site-overview">
+        <a class="site-overview-item" href="/">
+          <p class="site-overview-num">5</p>
+          <p class="site-overview-name">Pages</p>
+        </a>
+        <a class="site-overview-item" href="/tags">
+          <p class="site-overview-num">5</p>
+          <p class="site-overview-name">Tags</p>
+        </a>
+        <a class="site-overview-item" href="/series">
+          <p class="site-overview-num">4</p>
+          <p class="site-overview-name">Series</p>
+        </a>
+      </div><div class="sidebar-quote collapsed"><p class="sidebar-quote-content">🌈 获取中...</p>
+  <p class="rainbow-from"></p></div></div>
+  </div>
+  <div class="back2top" id="Back2top" role="button">
+    <i class="back2top-icon fas fa-angle-double-up"></i>
+    <span class="back2top-progress" id="Back2topProgress"></span>
+  </div>
+</div>
+<div class="sidebar-toggle" id="SidebarToggle" role="button">
+  <i class="sidebar-toggle-icon right-arrow">&#xf061</i>
+  <i class="sidebar-toggle-icon bars">&#xf0c9</i>
+  <i class="sidebar-toggle-icon left-arrow">&#xf060</i>
+</div>
+<div id="SidebarFill"></div></aside>
+  </div>
+  <div class="loading-track"><div class="loading-progress"></div></div>
+
+<script src="/js/fancybox.umd.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/fancybox.css">
+<script type="module">
+  Fancybox.bind("[data-fancybox]", {
+    groupAll: true,
+    hideScrollbar: true, 
+    caption: function(instance, slide, caption){
+      const figcaption = slide.triggerEl?.querySelector("figcaption .title");
+      return figcaption ? figcaption.innerHTML : slide.caption || "";
+    }
+  });
+</script>
+
+<script src="/js/daisy.js"></script>
+<script data-pjax src="/js/daisy.each.js"></script>
+<script src="/js/pjax.js"></script>
+<script src="/js/pjax.user.js"></script>
+<script>
+  fetch('https://api.eatrice.top')
+  .then(response => response.json())
+  .then(data => {
+    var sidebar_quote_content = document.querySelector('.sidebar-quote-content');
+    var sidebar_quote_from = document.querySelector('.sidebar-quote-from');
+    sidebar_quote_content.innerHTML = data.Content;
+    if(data.Author == 'unknown' && data.Source == 'unknown') {
+      sidebar_quote_from.setAttribute('visibility', 'hidden');
+    } else {
+      var from_text = "—";
+      if(data.Author != 'unknown') {
+        from_text += ' ' + data.Author;
+      }
+      if(data.Source != 'unknown') {
+        from_text += '《' + data.Source + '》';
+      }
+      sidebar_quote_from.innerHTML = from_text;
+    }
+  })
+  .catch(console.error)
+</script></body>
+</html>

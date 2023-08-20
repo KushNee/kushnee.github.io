@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on KCN&#39;s Blog</title>
+    <link>https://kushnee.github.io/series/java/</link>
+    <description>Recent content in Java on KCN&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 19 Aug 2023 23:29:19 +0800</lastBuildDate><atom:link href="https://kushnee.github.io/series/java/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Logback 自动 Json 序列化和转换器原理解析</title>
+      <link>https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Sat, 19 Aug 2023 23:44:42 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</guid>
+      <description>如何自动对对象进行 json 序列化 前情提要 java 开发中，大家一般都会用 Slf4j+logback 的组合来写日志。我也是。 logback 有个很方便的功能：当你占位符对应的参数是个对象的时候，</description>
+    </item>
+    
+    <item>
+      <title>Lombok 中 Data 和 Builder 合用产生的问题</title>
+      <link>https://kushnee.github.io/series/java/lombok-%E4%B8%AD-data-%E5%92%8C-builder-%E5%90%88%E7%94%A8%E4%BA%A7%E7%94%9F%E7%9A%84%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Sat, 19 Aug 2023 23:29:29 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/java/lombok-%E4%B8%AD-data-%E5%92%8C-builder-%E5%90%88%E7%94%A8%E4%BA%A7%E7%94%9F%E7%9A%84%E9%97%AE%E9%A2%98/</guid>
+      <description>&lt;p&gt;Lombok 是 Java 开发的一件利器，它可以减少大量模板代码的使用。在其中最常使用到的注解应该就是 &lt;code&gt;@Data&lt;/code&gt; ，可以在编译时自动生成 &lt;code&gt;getter&lt;/code&gt;、&lt;code&gt;setter&lt;/code&gt;、&lt;br /&gt;
+&lt;code&gt;equals&lt;/code&gt;、&lt;code&gt;hashcode&lt;/code&gt; 等方法。而 &lt;code&gt;@Builder&lt;/code&gt; 则用来快速实现 builder 模式。但是，如果两者同时使用却会产生一些意想不到的报错。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

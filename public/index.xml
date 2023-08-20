@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>KCN&#39;s Blog - Home on KCN&#39;s Blog</title>
+    <link>https://kushnee.github.io/</link>
+    <description>Recent content in KCN&#39;s Blog - Home on KCN&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 19 Aug 2023 23:24:33 +0800</lastBuildDate><atom:link href="https://kushnee.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Logback 自动 Json 序列化和转换器原理解析</title>
+      <link>https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Sat, 19 Aug 2023 23:44:42 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</guid>
+      <description>如何自动对对象进行 json 序列化 前情提要 java 开发中，大家一般都会用 Slf4j+logback 的组合来写日志。我也是。 logback 有个很方便的功能：当你占位符对应的参数是个对象的时候，</description>
+    </item>
+    
+    <item>
+      <title>为什么求两数之和用哈希表比暴力法快</title>
+      <link>https://kushnee.github.io/series/algorithm/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B1%82%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8C%E7%94%A8%E5%93%88%E5%B8%8C%E8%A1%A8%E6%AF%94%E6%9A%B4%E5%8A%9B%E6%B3%95%E5%BF%AB/</link>
+      <pubDate>Sat, 19 Aug 2023 23:39:59 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/algorithm/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B1%82%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8C%E7%94%A8%E5%93%88%E5%B8%8C%E8%A1%A8%E6%AF%94%E6%9A%B4%E5%8A%9B%E6%B3%95%E5%BF%AB/</guid>
+      <description>&lt;p&gt;昨天在 Leetcode 中国上看到两数之和的&lt;a href=&#34;https://leetcode-cn.com/problems/two-sum/solution/liang-shu-zhi-he-by-leetcode-2/&#34; target=&#34;_blank&#34; rel=&#34;external&#34;&gt;官方解法评论&lt;/a&gt;里，有人认为暴力法应该比哈希表更快。想就此讨论下。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>数组内查询重复(空间复杂度 O(1))</title>
+      <link>https://kushnee.github.io/series/algorithm/%E6%95%B0%E7%BB%84%E5%86%85%E6%9F%A5%E8%AF%A2%E9%87%8D%E5%A4%8D%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6-o1/</link>
+      <pubDate>Sat, 19 Aug 2023 23:35:29 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/algorithm/%E6%95%B0%E7%BB%84%E5%86%85%E6%9F%A5%E8%AF%A2%E9%87%8D%E5%A4%8D%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6-o1/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;假设有一个长度为 n 的数组，所有数字都在 0~n-1 范围内。数组中某些数字是重复的，但不知道几个数字重复了，也不知道每个数字重复了几次。&lt;br /&gt;
+请找出数组中任意一个重复的数字。&lt;br /&gt;
+例如：一个数组 array: {2, 3, 1, 2, 4, 5}，那么对应输出是重复数字 2&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
+    
+    <item>
+      <title>Lombok 中 Data 和 Builder 合用产生的问题</title>
+      <link>https://kushnee.github.io/series/java/lombok-%E4%B8%AD-data-%E5%92%8C-builder-%E5%90%88%E7%94%A8%E4%BA%A7%E7%94%9F%E7%9A%84%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Sat, 19 Aug 2023 23:29:29 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/java/lombok-%E4%B8%AD-data-%E5%92%8C-builder-%E5%90%88%E7%94%A8%E4%BA%A7%E7%94%9F%E7%9A%84%E9%97%AE%E9%A2%98/</guid>
+      <description>&lt;p&gt;Lombok 是 Java 开发的一件利器，它可以减少大量模板代码的使用。在其中最常使用到的注解应该就是 &lt;code&gt;@Data&lt;/code&gt; ，可以在编译时自动生成 &lt;code&gt;getter&lt;/code&gt;、&lt;code&gt;setter&lt;/code&gt;、&lt;br /&gt;
+&lt;code&gt;equals&lt;/code&gt;、&lt;code&gt;hashcode&lt;/code&gt; 等方法。而 &lt;code&gt;@Builder&lt;/code&gt; 则用来快速实现 builder 模式。但是，如果两者同时使用却会产生一些意想不到的报错。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>同步、异步、阻塞和非阻塞之间的概念</title>
+      <link>https://kushnee.github.io/series/%E7%BC%96%E7%A8%8B%E6%A6%82%E5%BF%B5/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%E4%B9%8B%E9%97%B4%E7%9A%84%E6%A6%82%E5%BF%B5/</link>
+      <pubDate>Sat, 19 Aug 2023 23:20:19 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/%E7%BC%96%E7%A8%8B%E6%A6%82%E5%BF%B5/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5%E9%98%BB%E5%A1%9E%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9E%E4%B9%8B%E9%97%B4%E7%9A%84%E6%A6%82%E5%BF%B5/</guid>
+      <description>说明 同步：必须等到资源返回之后才能继续执行 异步：先请求资源，之后在需要的地方使用资源 阻塞：资源请求后，必须成功获取返回后才能继续执行 非阻塞：</description>
+    </item>
+    
+  </channel>
+</rss>

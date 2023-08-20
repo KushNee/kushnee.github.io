@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>logback on KCN&#39;s Blog</title>
+    <link>https://kushnee.github.io/tags/logback/</link>
+    <description>Recent content in logback on KCN&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 19 Aug 2023 23:44:42 +0800</lastBuildDate><atom:link href="https://kushnee.github.io/tags/logback/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Logback 自动 Json 序列化和转换器原理解析</title>
+      <link>https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Sat, 19 Aug 2023 23:44:42 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/java/logback-%E8%87%AA%E5%8A%A8-json-%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</guid>
+      <description>如何自动对对象进行 json 序列化 前情提要 java 开发中，大家一般都会用 Slf4j+logback 的组合来写日志。我也是。 logback 有个很方便的功能：当你占位符对应的参数是个对象的时候，</description>
+    </item>
+    
+  </channel>
+</rss>

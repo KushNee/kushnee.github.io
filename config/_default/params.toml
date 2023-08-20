@@ -1,0 +1,22 @@
+[daisy]
+  subtitle = 'KCN | Back-end Developer'
+  description = 'PT & Code'
+  mes_404 = 'Lost in the sea...'
+  scroll_title = true
+  [daisy.related]
+    enable=true
+  [daisy.pjax]
+    enable = true
+  [daisy.fancybox]
+    enable = true
+  # sidebar
+  [daisy.quote]
+    enable = 'rainbow' # or 'rainbow'
+  [daisy.footer]
+    enable = ["poweredby", "copyright", "creativecommons"]
+  [daisy.footer.copyright]
+    startyear = 2016
+    icon = '''<span class="heart animate__heartBeat animate__infinite"><i class="fas fa-heart"></i></span>'''
+  [daisy.footer.creativecommons]
+    scheme = "by-nc-sa"
+    lang = "deed.zh"

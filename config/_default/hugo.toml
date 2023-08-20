@@ -1,4 +1,75 @@
-baseURL = 'http://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = "KCN's Blog"
+baseURL = 'https://kushnee.github.io/'
 theme = 'daisilia'
+enableEmoji = true
+hasCJKLanguage = true
+paginate = 10
+paginatePath = 'page'
+
+# language
+languageCode = 'zh-cn'
+defaultContentLanguage = 'zh'
+[languages.zh]
+  languagedirection = 'zh'
+  title = "KCN's Blog"
+  weight = 10
+
+[frontmatter]
+  date = ['date', 'publishDate', 'lastmod']
+  expiryDate = ['expiryDate']
+  lastmod = ['lastmod', 'date', 'publishDate']
+  publishDate = ['publishDate', 'date']
+
+[author]
+  fullname = "Kush Nee"
+  nickname = "KCN"
+  avatar = "/images/avatar.png"
+  homepage = "https://kushnee.github.io"
+
+[taxonomies]
+  tag = 'tags'
+  # category = 'categories'
+
+# menus
+[menu]
+[[menu.daisy]]
+  identifier = 'home'
+  name = 'Home'
+  pre = '<i class="fas fa-home"></i>'
+  url = '/'
+  weight = 1
+[[menu.daisy]]
+  identifier = 'about'
+  name = 'About'
+  pre = '<i class="fas fa-user"></i>'
+  url = '/about/'
+  weight = 2
+[[menu.daisy]]
+  identifier = 'tags'
+  name = 'Tags'
+  pre = '<i class="fas fa-tags"></i>'
+  url = '/tags/'
+  weight = 3
+[[menu.daisy]]
+  identifier = 'series'
+  name = 'Series'
+  pre = '<i class="fas fa-book"></i>'
+  url = '/series/'
+  weight = 4
+# [[menu.daisy]]
+#   pre = '<i class="fas fa-search"></i>'
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[caches]
+  [caches.getresource]
+    dir = ':resourceDir/_gen'
+    # maxAge = "72h"
+    maxAge = -1
+
+[module]
+[[module.mounts]]
+  source = 'content'
+  target = 'content'
+  excludeFiles = ['**.drawio']

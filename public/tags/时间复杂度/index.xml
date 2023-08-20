@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>时间复杂度 on KCN&#39;s Blog</title>
+    <link>https://kushnee.github.io/tags/%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6/</link>
+    <description>Recent content in 时间复杂度 on KCN&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 19 Aug 2023 23:39:59 +0800</lastBuildDate><atom:link href="https://kushnee.github.io/tags/%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>为什么求两数之和用哈希表比暴力法快</title>
+      <link>https://kushnee.github.io/series/algorithm/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B1%82%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8C%E7%94%A8%E5%93%88%E5%B8%8C%E8%A1%A8%E6%AF%94%E6%9A%B4%E5%8A%9B%E6%B3%95%E5%BF%AB/</link>
+      <pubDate>Sat, 19 Aug 2023 23:39:59 +0800</pubDate>
+      
+      <guid>https://kushnee.github.io/series/algorithm/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B1%82%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8C%E7%94%A8%E5%93%88%E5%B8%8C%E8%A1%A8%E6%AF%94%E6%9A%B4%E5%8A%9B%E6%B3%95%E5%BF%AB/</guid>
+      <description>&lt;p&gt;昨天在 Leetcode 中国上看到两数之和的&lt;a href=&#34;https://leetcode-cn.com/problems/two-sum/solution/liang-shu-zhi-he-by-leetcode-2/&#34; target=&#34;_blank&#34; rel=&#34;external&#34;&gt;官方解法评论&lt;/a&gt;里，有人认为暴力法应该比哈希表更快。想就此讨论下。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
