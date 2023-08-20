@@ -1,5 +1,5 @@
 title = "KCN's Blog"
-baseURL = 'https://kushnee.github.io/'
+baseURL = 'https://kushnee.dev'
 theme = 'daisilia'
 enableEmoji = true
 hasCJKLanguage = true
